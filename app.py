@@ -2,35 +2,50 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.express as px
+from PIL import Image
 
 # =====================================================
 # PENGATURAN HALAMAN
 # =====================================================
 
 st.set_page_config(
-    page_title="Simulasi Batu Bara",
+    page_title="Analisis Intertemporal Sumber Daya Batu Bara",
     layout="wide"
 )
+
+# =====================================================
+# LOAD LOGO
+# =====================================================
+
+logo = Image.open("LOGO UNISBA.jpg")
 
 # =====================================================
 # HEADER
 # =====================================================
 
-st.title("Simulasi Harga Sumber Daya Batu Bara")
+col1, col2 = st.columns([1, 6])
 
-st.markdown("""
-### Kelompok 8
+with col1:
+    st.image(logo, width=120)
 
-* Nadylah Agustinawati (10090224003)
-* Silmi Yusniah Salsabila (10090224020)
-* Siti Annisa Dewanty (10090224033)
+with col2:
+    st.title("Analisis Intertemporal Sumber Daya Batu Bara")
 
-### Mata Kuliah
-Ekonomi Sumber Daya Alam dan Lingkungan
+    st.markdown("""
+    ### PT Indo Tambangraya Megah
 
-### Dosen Pengampu
-Yuhka Sundaya S.E., M.Si.
-""")
+    ### Kelompok 8
+
+    * Nadylah Agustinawati (10090224003)
+    * Silmi Yusniah Salsabila (10090224020)
+    * Siti Annisa Dewanty (10090224033)
+
+    ### Mata Kuliah
+    Ekonomi Sumber Daya Alam dan Lingkungan
+
+    ### Dosen Pengampu
+    Yuhka Sundaya S.E., M.Si.
+    """)
 
 st.markdown("---")
 
@@ -198,7 +213,7 @@ with col4:
     )
 
 # =====================================================
-# PENJELASAN STRUKTUR PASAR
+# ANALISIS STRUKTUR PASAR
 # =====================================================
 
 st.subheader("Analisis Struktur Pasar")
@@ -367,8 +382,6 @@ agar memperoleh keuntungan lebih cepat.
 
 st.subheader("Analisis Green Paradox")
 
-# Data green paradox
-
 green_df = pd.DataFrame({
     "Tahun": hotelling_tahun,
     "Ekstraksi": np.linspace(produksi, produksi * 1.5, 10)
@@ -441,4 +454,4 @@ atau kebijakan lingkungan di masa depan.
 
 st.markdown("---")
 
-st.caption("Project Simulasi Harga Batu Bara - Streamlit")
+st.caption("Project Analisis Intertemporal Sumber Daya Batu Bara")
