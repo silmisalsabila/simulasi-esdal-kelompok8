@@ -17,6 +17,7 @@ st.set_page_config(
 # LOAD LOGO
 # =====================================================
 
+# GANTI NAMA FILE SESUAI NAMA LOGO DI FOLDER KALIAN
 logo = Image.open("LOGO UNISBA.jpg")
 
 # =====================================================
@@ -29,6 +30,7 @@ with col1:
     st.image(logo, width=120)
 
 with col2:
+
     st.title("Analisis Intertemporal Sumber Daya Batu Bara")
 
     st.markdown("""
@@ -114,9 +116,8 @@ suku_bunga = st.sidebar.slider(
 
 r = suku_bunga / 100
 
-# Produksi berdasarkan struktur pasar
-
 if pasar == "Persaingan":
+
     produksi = stok_awal * 0.15
 
     penjelasan_pasar = """
@@ -126,6 +127,7 @@ if pasar == "Persaingan":
     """
 
 elif pasar == "Monopoli":
+
     produksi = stok_awal * 0.10
 
     penjelasan_pasar = """
@@ -135,6 +137,7 @@ elif pasar == "Monopoli":
     """
 
 else:
+
     produksi = stok_awal * 0.12
 
     penjelasan_pasar = """
@@ -398,29 +401,31 @@ fig6 = px.line(
 st.plotly_chart(fig6, use_container_width=True)
 
 if suku_bunga > 10:
+
     st.warning("""
-Tingkat suku bunga yang tinggi menyebabkan perusahaan
-cenderung mempercepat ekstraksi sumber daya alam.
+    Tingkat suku bunga yang tinggi menyebabkan perusahaan
+    cenderung mempercepat ekstraksi sumber daya alam.
 
-Kondisi ini mencerminkan Green Paradox,
-yaitu eksploitasi sumber daya yang semakin cepat
-sebelum nilainya menurun di masa depan.
+    Kondisi ini mencerminkan Green Paradox,
+    yaitu eksploitasi sumber daya yang semakin cepat
+    sebelum nilainya menurun di masa depan.
 
-Grafik menunjukkan adanya peningkatan ekstraksi
-seiring kenaikan ekspektasi harga sumber daya.
-""")
+    Grafik menunjukkan adanya peningkatan ekstraksi
+    seiring kenaikan ekspektasi harga sumber daya.
+    """)
 
 else:
+
     st.success("""
-Tingkat suku bunga yang rendah menunjukkan
-pengelolaan sumber daya yang lebih berkelanjutan.
+    Tingkat suku bunga yang rendah menunjukkan
+    pengelolaan sumber daya yang lebih berkelanjutan.
 
-Eksploitasi dilakukan lebih terkendali
-sehingga stok sumber daya bertahan lebih lama.
+    Eksploitasi dilakukan lebih terkendali
+    sehingga stok sumber daya bertahan lebih lama.
 
-Grafik menunjukkan laju ekstraksi yang lebih stabil
-sehingga risiko Green Paradox lebih rendah.
-""")
+    Grafik menunjukkan laju ekstraksi yang lebih stabil
+    sehingga risiko Green Paradox lebih rendah.
+    """)
 
 # =====================================================
 # KESIMPULAN
