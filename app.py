@@ -8,7 +8,7 @@ import plotly.express as px
 # =====================================================
 
 st.set_page_config(
-    page_title="Simulasi Batu Bara",
+    page_title="Analisis Intertemporal Sumber Daya Batu Bara",
     layout="wide"
 )
 
@@ -16,9 +16,11 @@ st.set_page_config(
 # HEADER
 # =====================================================
 
-st.title("Simulasi Harga Sumber Daya Batu Bara")
+st.title("Analisis Intertemporal Sumber Daya Batu Bara")
 
 st.markdown("""
+### Studi Kasus: PT Indo Tambangraya Megah (ITM)
+
 ### Kelompok 8
 
 * Nadylah Agustinawati (10090224003)
@@ -99,45 +101,36 @@ suku_bunga = st.sidebar.slider(
 
 r = suku_bunga / 100
 
-# Produksi berdasarkan struktur pasar
-
 if pasar == "Persaingan":
     produksi = stok_awal * 0.15
 
     penjelasan_pasar = """
     Pada struktur pasar persaingan, banyak perusahaan melakukan produksi
     sehingga tingkat eksploitasi sumber daya cenderung lebih tinggi.
-    Harga ditentukan oleh mekanisme pasar dan perusahaan bertindak sebagai price taker.
     """
 
 elif pasar == "Monopoli":
     produksi = stok_awal * 0.10
 
     penjelasan_pasar = """
-    Pada struktur pasar monopoli, produksi dikendalikan oleh satu perusahaan utama.
-    Perusahaan memiliki kekuatan menentukan harga sehingga produksi cenderung lebih rendah
-    untuk menjaga keuntungan jangka panjang.
+    Pada struktur pasar monopoli, produksi dikendalikan oleh satu perusahaan utama
+    sehingga eksploitasi lebih terkendali untuk menjaga keuntungan jangka panjang.
     """
 
 else:
     produksi = stok_awal * 0.12
 
     penjelasan_pasar = """
-    Pada struktur pasar oligopoli, hanya beberapa perusahaan besar yang menguasai pasar.
-    Produksi dilakukan secara strategis karena setiap perusahaan mempertimbangkan
-    keputusan pesaing dalam menentukan jumlah produksi dan harga.
+    Pada struktur pasar oligopoli, beberapa perusahaan besar saling bersaing
+    dalam menentukan produksi dan harga.
     """
 
-# Harga simulasi
-
 harga_simulasi = harga_pasar + biaya_marginal + (muc_awal * r)
-
-# Waktu habis
 
 waktu_habis = stok_awal / produksi
 
 # =====================================================
-# DATA SIMULASI STOK
+# SIMULASI STOK
 # =====================================================
 
 tahun = []
@@ -146,19 +139,11 @@ stok = []
 sisa = stok_awal
 
 for i in range(1, 11):
-
     tahun.append(i)
-
-    sisa = sisa - produksi
-
+    sisa -= produksi
     if sisa < 0:
         sisa = 0
-
     stok.append(sisa)
-
-# =====================================================
-# DATAFRAME STOK
-# =====================================================
 
 stok_df = pd.DataFrame({
     "Tahun": tahun,
@@ -174,240 +159,63 @@ st.subheader("Hasil Simulasi")
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
-    st.metric(
-        "Struktur Pasar",
-        pasar
-    )
+    st.metric("Struktur Pasar", pasar)
 
 with col2:
-    st.metric(
-        "Produksi",
-        f"{produksi:,.0f}"
-    )
+    st.metric("Produksi", f"{produksi:,.0f}")
 
 with col3:
-    st.metric(
-        "Harga Simulasi",
-        f"Rp {harga_simulasi:,.0f}"
-    )
+    st.metric("Harga Simulasi", f"Rp {harga_simulasi:,.0f}")
 
 with col4:
-    st.metric(
-        "Waktu Habis",
-        f"{waktu_habis:.1f} Tahun"
-    )
-
-# =====================================================
-# PENJELASAN STRUKTUR PASAR
-# =====================================================
-
-st.subheader("Analisis Struktur Pasar")
+    st.metric("Waktu Habis", f"{waktu_habis:.1f} Tahun")
 
 st.info(penjelasan_pasar)
 
 # =====================================================
-# PARAMETER DASAR ANALISIS
+# GRAFIK STOK
 # =====================================================
 
-st.subheader("Parameter Dasar Analisis")
-
-parameter_df = pd.DataFrame({
-    "Parameter": [
-        "Harga Pasar",
-        "Biaya Marginal",
-        "MUC Awal",
-        "Suku Bunga"
-    ],
-    "Nilai": [
-        f"Rp {harga_pasar:,.0f}",
-        f"Rp {biaya_marginal:,.0f}",
-        f"Rp {muc_awal:,.0f}",
-        f"{suku_bunga}%"
-    ]
-})
-
-st.table(parameter_df)
-
-# =====================================================
-# TABEL SISA STOK
-# =====================================================
-
-st.subheader("Sisa Stok Batu Bara")
-
-st.dataframe(stok_df)
-
-# =====================================================
-# GRAFIK PENURUNAN STOK
-# =====================================================
-
-st.subheader("Grafik Penurunan Stok")
-
-fig1 = px.line(
-    stok_df,
-    x="Tahun",
-    y="Sisa Stok",
-    markers=True,
-    title="Penurunan Stok Batu Bara"
-)
+fig1 = px.line(stok_df, x="Tahun", y="Sisa Stok",
+               markers=True, title="Penurunan Stok Batu Bara")
 
 st.plotly_chart(fig1, use_container_width=True)
 
 # =====================================================
-# GRAFIK PRODUKSI
+# HOTELLING MODEL
 # =====================================================
-
-produksi_df = pd.DataFrame({
-    "Kategori": ["Produksi"],
-    "Nilai": [produksi]
-})
-
-st.subheader("Grafik Produksi")
-
-fig2 = px.bar(
-    produksi_df,
-    x="Kategori",
-    y="Nilai",
-    title="Jumlah Produksi"
-)
-
-st.plotly_chart(fig2, use_container_width=True)
-
-# =====================================================
-# DATA HISTORIS PRODUKSI DAN HARGA
-# =====================================================
-
-st.subheader("Data Historis Produksi dan Harga Batu Bara")
-
-historis_df = pd.DataFrame({
-    "Tahun": [2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022],
-    "Produksi": [28.5, 25.6, 21.8, 22.1, 23.4, 18.4, 18.2, 16.6],
-    "Harga": [1040331, 1069758, 1486929, 1713690, 1348449, 1007442, 2103165, 4992204]
-})
-
-st.dataframe(historis_df)
-
-# =====================================================
-# GRAFIK HISTORIS PRODUKSI
-# =====================================================
-
-fig3 = px.line(
-    historis_df,
-    x="Tahun",
-    y="Produksi",
-    markers=True,
-    title="Grafik Historis Produksi Batu Bara"
-)
-
-st.plotly_chart(fig3, use_container_width=True)
-
-# =====================================================
-# GRAFIK HISTORIS HARGA
-# =====================================================
-
-fig4 = px.line(
-    historis_df,
-    x="Tahun",
-    y="Harga",
-    markers=True,
-    title="Grafik Historis Harga Batu Bara"
-)
-
-st.plotly_chart(fig4, use_container_width=True)
-
-# =====================================================
-# MODEL HOTELLING
-# =====================================================
-
-st.subheader("Model Optimasi Hotelling")
 
 hotelling_tahun = np.arange(1, 11)
-
-hotelling_harga = []
-
-for t in hotelling_tahun:
-
-    harga_t = harga_pasar * ((1 + r) ** t)
-
-    hotelling_harga.append(harga_t)
+hotelling_harga = [(harga_pasar * ((1 + r) ** t)) for t in hotelling_tahun]
 
 hotelling_df = pd.DataFrame({
     "Tahun": hotelling_tahun,
     "Harga Hotelling": hotelling_harga
 })
 
+st.subheader("Model Hotelling")
 st.dataframe(hotelling_df)
 
-# =====================================================
-# GRAFIK HOTELLING
-# =====================================================
+fig2 = px.line(hotelling_df, x="Tahun", y="Harga Hotelling",
+               markers=True, title="Optimasi Hotelling")
 
-fig5 = px.line(
-    hotelling_df,
-    x="Tahun",
-    y="Harga Hotelling",
-    markers=True,
-    title="Grafik Optimasi Hotelling"
-)
-
-st.plotly_chart(fig5, use_container_width=True)
-
-st.write("""
-Model Hotelling menjelaskan bahwa harga sumber daya tidak terbarukan
-akan meningkat seiring waktu sesuai tingkat suku bunga.
-
-Dalam simulasi ini, semakin tinggi suku bunga,
-maka harga optimal batu bara di masa depan juga meningkat.
-Hal tersebut mendorong perusahaan untuk mempercepat ekstraksi
-agar memperoleh keuntungan lebih cepat.
-""")
+st.plotly_chart(fig2, use_container_width=True)
 
 # =====================================================
-# ANALISIS GREEN PARADOX
+# GREEN PARADOX
 # =====================================================
 
-st.subheader("Analisis Green Paradox")
-
-# Data green paradox
+st.subheader("Green Paradox")
 
 green_df = pd.DataFrame({
     "Tahun": hotelling_tahun,
     "Ekstraksi": np.linspace(produksi, produksi * 1.5, 10)
 })
 
-fig6 = px.line(
-    green_df,
-    x="Tahun",
-    y="Ekstraksi",
-    markers=True,
-    title="Grafik Green Paradox"
-)
+fig3 = px.line(green_df, x="Tahun", y="Ekstraksi",
+               markers=True, title="Green Paradox")
 
-st.plotly_chart(fig6, use_container_width=True)
-
-if suku_bunga > 10:
-    st.warning("""
-Tingkat suku bunga yang tinggi menyebabkan perusahaan
-cenderung mempercepat ekstraksi sumber daya alam.
-
-Kondisi ini mencerminkan Green Paradox,
-yaitu eksploitasi sumber daya yang semakin cepat
-sebelum nilainya menurun di masa depan.
-
-Grafik menunjukkan adanya peningkatan ekstraksi
-seiring kenaikan ekspektasi harga sumber daya.
-""")
-
-else:
-    st.success("""
-Tingkat suku bunga yang rendah menunjukkan
-pengelolaan sumber daya yang lebih berkelanjutan.
-
-Eksploitasi dilakukan lebih terkendali
-sehingga stok sumber daya bertahan lebih lama.
-
-Grafik menunjukkan laju ekstraksi yang lebih stabil
-sehingga risiko Green Paradox lebih rendah.
-""")
+st.plotly_chart(fig3, use_container_width=True)
 
 # =====================================================
 # KESIMPULAN
@@ -416,29 +224,14 @@ sehingga risiko Green Paradox lebih rendah.
 st.subheader("Kesimpulan")
 
 st.write(f"""
-Pada struktur pasar {pasar},
-jumlah produksi sebesar {produksi:,.0f}
-menyebabkan stok batu bara habis dalam
-sekitar {waktu_habis:.1f} tahun.
+Pada studi kasus PT Indo Tambangraya Megah,
+struktur pasar {pasar} menghasilkan produksi {produksi:,.0f}
+dengan estimasi stok habis dalam {waktu_habis:.1f} tahun.
 
-Harga pasar sebesar Rp {harga_pasar:,.0f},
-biaya marginal sebesar Rp {biaya_marginal:,.0f},
-MUC awal sebesar Rp {muc_awal:,.0f},
-dan suku bunga {suku_bunga}%
-mempengaruhi harga simulasi serta kecepatan
-eksploitasi sumber daya batu bara.
-
-Model Hotelling menunjukkan bahwa harga sumber daya
-akan meningkat dari waktu ke waktu,
-sedangkan Green Paradox menunjukkan risiko
-percepatan eksploitasi akibat ekspektasi kenaikan harga
-atau kebijakan lingkungan di masa depan.
+Model Hotelling menunjukkan kenaikan harga sumber daya
+seiring waktu, sedangkan Green Paradox menunjukkan potensi
+percepatan eksploitasi akibat ekspektasi harga di masa depan.
 """)
 
-# =====================================================
-# FOOTER
-# =====================================================
-
 st.markdown("---")
-
-st.caption("Project Simulasi Harga Batu Bara - Streamlit")
+st.caption("Analisis Intertemporal Sumber Daya Batu Bara - Streamlit")
