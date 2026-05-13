@@ -18,7 +18,7 @@ st.set_page_config(
 # =====================================================
 
 # GANTI NAMA FILE SESUAI NAMA LOGO DI FOLDER KALIAN
-logo = open("LOGO UNISBA.jpg")
+logo = image.open("LOGO UNISBA.jpg")
 
 # =====================================================
 # HEADER
