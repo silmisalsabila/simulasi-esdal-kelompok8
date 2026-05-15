@@ -93,32 +93,6 @@ produksi_awal = st.sidebar.slider(
 )
 
 # =====================================================
-# SIMULASI PERMINTAAN
-# =====================================================
-
-permintaan = st.sidebar.selectbox(
-    "Kondisi Permintaan",
-    [
-        "Permintaan Normal",
-        "Permintaan Naik",
-        "Permintaan Turun"
-    ]
-)
-
-# =====================================================
-# FAKTOR PERMINTAAN
-# =====================================================
-
-if permintaan == "Permintaan Naik":
-    faktor_permintaan = 1.3
-
-elif permintaan == "Permintaan Turun":
-    faktor_permintaan = 0.7
-
-else:
-    faktor_permintaan = 1.0
-
-# =====================================================
 # TINGKAT DISKONTO
 # =====================================================
 
@@ -168,10 +142,9 @@ for pasar, parameter in struktur_pasar.items():
     respon_diskonto = parameter["respon_diskonto"]
 
     # =================================================
-    # PRODUKSI TERHUBUNG DENGAN:
-    # harga
-    # diskonto
-    # permintaan
+    # PRODUKSI TERKONEKSI DENGAN:
+    # harga pasar
+    # tingkat diskonto
     # struktur pasar
     # =================================================
 
@@ -182,17 +155,16 @@ for pasar, parameter in struktur_pasar.items():
             1 +
             (harga_pasar * respon_harga) +
             (r * respon_diskonto)
-        ) *
-        faktor_permintaan
+        )
     )
 
-    # membatasi produksi agar realistis
+    # produksi tidak boleh melebihi stok
 
     if produksi > stok_awal:
         produksi = stok_awal * 0.9
 
     # =================================================
-    # WAKTU HABIS
+    # WAKTU HABIS SUMBER DAYA
     # =================================================
 
     waktu_habis = stok_awal / produksi
@@ -204,7 +176,7 @@ for pasar, parameter in struktur_pasar.items():
     tahun = []
     produksi_tahun = []
     stok_tahun = []
-    permintaan_tahun = []
+    harga_tahun = []
 
     sisa_stok = stok_awal
 
@@ -212,27 +184,31 @@ for pasar, parameter in struktur_pasar.items():
 
         tahun.append(i)
 
-        # produksi meningkat karena diskonto
+        # harga meningkat mengikuti Hotelling
+
+        harga_periode = harga_pasar * ((1 + r) ** (i - 1))
+
+        harga_tahun.append(harga_periode)
+
+        # produksi dipengaruhi harga & diskonto
+
         produksi_periode = produksi * ((1 + r) ** (i - 1))
 
         # stok tidak boleh negatif
+
         if produksi_periode > sisa_stok:
             produksi_periode = sisa_stok
 
         produksi_tahun.append(produksi_periode)
 
-        # stok berkurang berdasarkan produksi
+        # stok berkurang karena produksi
+
         sisa_stok -= produksi_periode
 
         if sisa_stok < 0:
             sisa_stok = 0
 
         stok_tahun.append(sisa_stok)
-
-        # simulasi permintaan
-        permintaan_periode = produksi_periode * faktor_permintaan
-
-        permintaan_tahun.append(permintaan_periode)
 
     # =================================================
     # DATAFRAME
@@ -242,7 +218,7 @@ for pasar, parameter in struktur_pasar.items():
         "Tahun": tahun,
         "Produksi": produksi_tahun,
         "Sisa Stok": stok_tahun,
-        "Permintaan": permintaan_tahun
+        "Harga": harga_tahun
     })
 
     # =================================================
@@ -256,10 +232,14 @@ for pasar, parameter in struktur_pasar.items():
     })
 
     # =================================================
-    # DASHBOARD TIAP PASAR
+    # DASHBOARD TIAP STRUKTUR PASAR
     # =================================================
 
     st.subheader(f"Dashboard {pasar}")
+
+    # =================================================
+    # BARIS 1
+    # =================================================
 
     col1, col2 = st.columns(2)
 
@@ -302,39 +282,49 @@ for pasar, parameter in struktur_pasar.items():
         )
 
     # =================================================
-    # GRAFIK PERMINTAAN
+    # BARIS 2
     # =================================================
 
-    fig3 = px.area(
-        df,
-        x="Tahun",
-        y="Permintaan",
-        title=f"Diagram Permintaan - {pasar}"
-    )
+    col3, col4 = st.columns(2)
 
-    st.plotly_chart(
-        fig3,
-        use_container_width=True
-    )
+    # =================================================
+    # GRAFIK HARGA
+    # =================================================
+
+    with col3:
+
+        fig3 = px.line(
+            df,
+            x="Tahun",
+            y="Harga",
+            markers=True,
+            title=f"Simulasi Harga - {pasar}"
+        )
+
+        st.plotly_chart(
+            fig3,
+            use_container_width=True
+        )
 
     # =================================================
     # METRIK
     # =================================================
 
-    col3, col4 = st.columns(2)
-
-    with col3:
+    with col4:
 
         st.metric(
             "Produksi Awal",
             f"{produksi:,.0f}"
         )
 
-    with col4:
-
         st.metric(
             "Waktu Habis",
             f"{waktu_habis:.1f} Tahun"
+        )
+
+        st.metric(
+            "Stok Awal",
+            f"{stok_awal:,.0f}"
         )
 
     st.markdown("---")
@@ -358,21 +348,20 @@ st.dataframe(
 
 st.subheader("Kesimpulan")
 
-st.write(f"""
-Simulasi menunjukkan bahwa seluruh variabel ekonomi
-saling terhubung dalam menentukan tingkat eksploitasi
-sumber daya batu bara.
+st.write("""
+Simulasi menunjukkan bahwa harga pasar dan tingkat diskonto
+memengaruhi tingkat produksi sumber daya batu bara.
 
-Kenaikan harga dan tingkat diskonto menyebabkan
-produksi meningkat sehingga stok sumber daya
-lebih cepat habis.
+Semakin tinggi harga dan tingkat diskonto,
+perusahaan cenderung meningkatkan produksi,
+sehingga stok sumber daya lebih cepat habis.
 
 Pada struktur pasar persaingan sempurna,
-produksi menjadi paling tinggi karena perusahaan
-lebih agresif terhadap perubahan harga.
+tingkat produksi menjadi paling tinggi karena perusahaan
+lebih responsif terhadap perubahan harga.
 
-Monopoli menghasilkan produksi lebih rendah
-dan lebih terkendali untuk menjaga keberlanjutan stok.
+Monopoli menghasilkan produksi yang lebih rendah
+dan lebih terkendali untuk menjaga keberlanjutan sumber daya.
 
 Oligopoli berada di antara persaingan sempurna
 dan monopoli dalam menentukan tingkat produksi.
