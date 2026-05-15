@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.express as px
+from PIL import Image
 
 # =====================================================
 # PENGATURAN HALAMAN
@@ -13,22 +14,37 @@ st.set_page_config(
 )
 
 # =====================================================
-# HEADER
+# LOGO UNISBA
 # =====================================================
 
-st.title("Analisis Intertemporal Sumber Daya Batu Bara")
+# Simpan file logo dengan nama:
+# logo_unisba.png
+# lalu letakkan di folder yang sama dengan app.py
+
+logo = Image.open("logo_unisba.png")
+
+col_logo, col_title = st.columns([1, 6])
+
+with col_logo:
+    st.image(logo, width=100)
+
+with col_title:
+    st.title("Analisis Intertemporal Sumber Daya Batu Bara")
+    st.markdown("### Studi Kasus: PT Indo Tambangraya Megah (ITM)")
+
+# =====================================================
+# IDENTITAS KELOMPOK
+# =====================================================
 
 st.markdown("""
-### Studi Kasus: PT Indo Tambangraya Megah (ITM)
+## Kelompok 8
 
-### Kelompok 8
-
-* Nadylah Agustinawati (10090224003)
-* Silmi Yusniah Salsabila (10090224020)
-* Siti Annisa Dewanty (10090224033)
+- Nadylah Agustinawati (10090224003)  
+- Silmi Yusniah Salsabila (10090224020)  
+- Siti Annisa Dewanty (10090224033)  
 
 ### Mata Kuliah
-Ekonomi Sumber Daya Alam dan Lingkungan
+Ekonomi Sumber Daya Alam dan Lingkungan  
 
 ### Dosen Pengampu
 Yuhka Sundaya S.E., M.Si.
@@ -140,9 +156,12 @@ sisa = stok_awal
 
 for i in range(1, 11):
     tahun.append(i)
+
     sisa -= produksi
+
     if sisa < 0:
         sisa = 0
+
     stok.append(sisa)
 
 stok_df = pd.DataFrame({
@@ -176,8 +195,13 @@ st.info(penjelasan_pasar)
 # GRAFIK STOK
 # =====================================================
 
-fig1 = px.line(stok_df, x="Tahun", y="Sisa Stok",
-               markers=True, title="Penurunan Stok Batu Bara")
+fig1 = px.line(
+    stok_df,
+    x="Tahun",
+    y="Sisa Stok",
+    markers=True,
+    title="Penurunan Stok Batu Bara"
+)
 
 st.plotly_chart(fig1, use_container_width=True)
 
@@ -186,7 +210,11 @@ st.plotly_chart(fig1, use_container_width=True)
 # =====================================================
 
 hotelling_tahun = np.arange(1, 11)
-hotelling_harga = [(harga_pasar * ((1 + r) ** t)) for t in hotelling_tahun]
+
+hotelling_harga = [
+    (harga_pasar * ((1 + r) ** t))
+    for t in hotelling_tahun
+]
 
 hotelling_df = pd.DataFrame({
     "Tahun": hotelling_tahun,
@@ -194,10 +222,16 @@ hotelling_df = pd.DataFrame({
 })
 
 st.subheader("Model Hotelling")
+
 st.dataframe(hotelling_df)
 
-fig2 = px.line(hotelling_df, x="Tahun", y="Harga Hotelling",
-               markers=True, title="Optimasi Hotelling")
+fig2 = px.line(
+    hotelling_df,
+    x="Tahun",
+    y="Harga Hotelling",
+    markers=True,
+    title="Optimasi Hotelling"
+)
 
 st.plotly_chart(fig2, use_container_width=True)
 
@@ -212,8 +246,13 @@ green_df = pd.DataFrame({
     "Ekstraksi": np.linspace(produksi, produksi * 1.5, 10)
 })
 
-fig3 = px.line(green_df, x="Tahun", y="Ekstraksi",
-               markers=True, title="Green Paradox")
+fig3 = px.line(
+    green_df,
+    x="Tahun",
+    y="Ekstraksi",
+    markers=True,
+    title="Green Paradox"
+)
 
 st.plotly_chart(fig3, use_container_width=True)
 
@@ -225,13 +264,14 @@ st.subheader("Kesimpulan")
 
 st.write(f"""
 Pada studi kasus PT Indo Tambangraya Megah,
-struktur pasar {pasar} menghasilkan produksi {produksi:,.0f}
+struktur pasar {pasar} menghasilkan produksi sebesar {produksi:,.0f}
 dengan estimasi stok habis dalam {waktu_habis:.1f} tahun.
 
-Model Hotelling menunjukkan kenaikan harga sumber daya
-seiring waktu, sedangkan Green Paradox menunjukkan potensi
-percepatan eksploitasi akibat ekspektasi harga di masa depan.
+Model Hotelling menunjukkan bahwa harga sumber daya
+akan meningkat seiring waktu, sedangkan Green Paradox
+menunjukkan potensi percepatan eksploitasi akibat
+ekspektasi kenaikan harga di masa depan.
 """)
 
 st.markdown("---")
-st.caption("Analisis Intertemporal Sumber Daya Batu Bara - Streamlit")
+st.caption("Analisis Intertemporal Sumber Daya Batu Bara - Universitas Islam Bandung")
