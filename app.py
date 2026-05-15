@@ -120,7 +120,6 @@ permintaan = st.sidebar.selectbox(
 
 r = suku_bunga / 100
 
-# faktor permintaan
 if permintaan == "Permintaan Naik":
     faktor_permintaan = 1.3
 
@@ -209,7 +208,7 @@ hasil_df = pd.DataFrame(hasil_pasar)
 # METRIK UTAMA
 # =====================================================
 
-st.subheader("Ringkasan Hasil Simulasi")
+st.subheader("Ringkasan Simulasi")
 
 col1, col2, col3 = st.columns(3)
 
@@ -235,7 +234,7 @@ with col3:
 # TABEL PERBANDINGAN
 # =====================================================
 
-st.subheader("Perbandingan Tiga Struktur Pasar")
+st.subheader("Perbandingan Struktur Pasar")
 
 st.dataframe(
     hasil_df,
@@ -243,50 +242,148 @@ st.dataframe(
 )
 
 # =====================================================
-# DASHBOARD GRAFIK
+# DASHBOARD VISUALISASI
 # =====================================================
 
-col_a, col_b = st.columns(2)
+st.subheader("Dashboard Visualisasi")
+
+tab1, tab2, tab3 = st.tabs([
+    "Persaingan",
+    "Monopoli",
+    "Oligopoli"
+])
 
 # =====================================================
-# GRAFIK STOK SUMBER DAYA
+# TAB PERSAINGAN
 # =====================================================
 
-with col_a:
+with tab1:
 
-    fig1 = px.line(
-        gabungan_df,
-        x="Tahun",
-        y="Sisa Stok",
-        color="Struktur Pasar",
-        markers=True,
-        title="Perbandingan Stok Sumber Daya"
-    )
+    st.markdown("## Struktur Pasar Persaingan")
 
-    st.plotly_chart(
-        fig1,
-        use_container_width=True
-    )
+    df_persaingan = gabungan_df[
+        gabungan_df["Struktur Pasar"] == "Persaingan"
+    ]
+
+    col_a, col_b = st.columns(2)
+
+    with col_a:
+
+        fig1 = px.line(
+            df_persaingan,
+            x="Tahun",
+            y="Sisa Stok",
+            markers=True,
+            title="Grafik Sisa Stok Batu Bara"
+        )
+
+        st.plotly_chart(
+            fig1,
+            use_container_width=True
+        )
+
+    with col_b:
+
+        fig2 = px.bar(
+            df_persaingan,
+            x="Tahun",
+            y="Ekstraksi",
+            text_auto=True,
+            title="Grafik Ekstraksi Batu Bara"
+        )
+
+        st.plotly_chart(
+            fig2,
+            use_container_width=True
+        )
 
 # =====================================================
-# GRAFIK EKSTRAKSI
+# TAB MONOPOLI
 # =====================================================
 
-with col_b:
+with tab2:
 
-    fig2 = px.bar(
-        gabungan_df,
-        x="Tahun",
-        y="Ekstraksi",
-        color="Struktur Pasar",
-        barmode="group",
-        title="Perbandingan Ekstraksi per Tahun"
-    )
+    st.markdown("## Struktur Pasar Monopoli")
 
-    st.plotly_chart(
-        fig2,
-        use_container_width=True
-    )
+    df_monopoli = gabungan_df[
+        gabungan_df["Struktur Pasar"] == "Monopoli"
+    ]
+
+    col_c, col_d = st.columns(2)
+
+    with col_c:
+
+        fig3 = px.line(
+            df_monopoli,
+            x="Tahun",
+            y="Sisa Stok",
+            markers=True,
+            title="Grafik Sisa Stok Batu Bara"
+        )
+
+        st.plotly_chart(
+            fig3,
+            use_container_width=True
+        )
+
+    with col_d:
+
+        fig4 = px.bar(
+            df_monopoli,
+            x="Tahun",
+            y="Ekstraksi",
+            text_auto=True,
+            title="Grafik Ekstraksi Batu Bara"
+        )
+
+        st.plotly_chart(
+            fig4,
+            use_container_width=True
+        )
+
+# =====================================================
+# TAB OLIGOPOLI
+# =====================================================
+
+with tab3:
+
+    st.markdown("## Struktur Pasar Oligopoli")
+
+    df_oligopoli = gabungan_df[
+        gabungan_df["Struktur Pasar"] == "Oligopoli"
+    ]
+
+    col_e, col_f = st.columns(2)
+
+    with col_e:
+
+        fig5 = px.line(
+            df_oligopoli,
+            x="Tahun",
+            y="Sisa Stok",
+            markers=True,
+            title="Grafik Sisa Stok Batu Bara"
+        )
+
+        st.plotly_chart(
+            fig5,
+            use_container_width=True
+        )
+
+    with col_f:
+
+        fig6 = px.bar(
+            df_oligopoli,
+            x="Tahun",
+            y="Ekstraksi",
+            text_auto=True,
+            title="Grafik Ekstraksi Batu Bara"
+        )
+
+        st.plotly_chart(
+            fig6,
+            use_container_width=True
+        )
 
 # =====================================================
 # HOTELLING MODEL
@@ -306,7 +403,7 @@ hotelling_df = pd.DataFrame({
     "Harga Hotelling": hotelling_harga
 })
 
-fig3 = px.line(
+fig7 = px.line(
     hotelling_df,
     x="Tahun",
     y="Harga Hotelling",
@@ -315,7 +412,7 @@ fig3 = px.line(
 )
 
 st.plotly_chart(
-    fig3,
+    fig7,
     use_container_width=True
 )
 
@@ -334,7 +431,7 @@ green_df = pd.DataFrame({
     )
 })
 
-fig4 = px.line(
+fig8 = px.line(
     green_df,
     x="Tahun",
     y="Ekstraksi",
@@ -343,7 +440,7 @@ fig4 = px.line(
 )
 
 st.plotly_chart(
-    fig4,
+    fig8,
     use_container_width=True
 )
 
@@ -354,17 +451,17 @@ st.plotly_chart(
 st.subheader("Kesimpulan")
 
 st.write(f"""
-Dashboard ini menunjukkan bagaimana perubahan permintaan
-dan struktur pasar memengaruhi tingkat ekstraksi,
-sisa stok sumber daya, serta waktu habisnya cadangan batu bara.
+Dashboard ini menunjukkan pengaruh struktur pasar
+dan perubahan permintaan terhadap tingkat ekstraksi,
+sisa stok sumber daya, dan umur cadangan batu bara.
 
 Pada kondisi {permintaan.lower()},
-struktur pasar persaingan cenderung menghasilkan ekstraksi tertinggi,
-sedangkan monopoli menghasilkan eksploitasi yang lebih terkendali.
+struktur pasar persaingan menghasilkan ekstraksi terbesar,
+sedangkan monopoli lebih mampu menjaga keberlanjutan stok.
 
 Model Hotelling memperlihatkan kenaikan harga sumber daya
-dari waktu ke waktu, sedangkan Green Paradox menunjukkan
-potensi percepatan eksploitasi akibat ekspektasi harga di masa depan.
+seiring waktu, sedangkan Green Paradox menunjukkan
+potensi percepatan eksploitasi akibat ekspektasi harga masa depan.
 """)
 
 st.markdown("---")
