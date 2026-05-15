@@ -17,10 +17,6 @@ st.set_page_config(
 # LOGO UNISBA
 # =====================================================
 
-# Simpan file logo dengan nama:
-# logo_unisba.png
-# lalu letakkan di folder yang sama dengan app.py
-
 logo = Image.open("logo_unisba.png")
 
 col_logo, col_title = st.columns([1, 6])
@@ -74,6 +70,13 @@ stok_awal = st.sidebar.slider(
     5000
 )
 
+tahun_simulasi = st.sidebar.slider(
+    "Jumlah Tahun Simulasi",
+    5,
+    30,
+    10
+)
+
 # =====================================================
 # PARAMETER DASAR ANALISIS
 # =====================================================
@@ -118,6 +121,7 @@ suku_bunga = st.sidebar.slider(
 r = suku_bunga / 100
 
 if pasar == "Persaingan":
+
     produksi = stok_awal * 0.15
 
     penjelasan_pasar = """
@@ -126,6 +130,7 @@ if pasar == "Persaingan":
     """
 
 elif pasar == "Monopoli":
+
     produksi = stok_awal * 0.10
 
     penjelasan_pasar = """
@@ -134,6 +139,7 @@ elif pasar == "Monopoli":
     """
 
 else:
+
     produksi = stok_awal * 0.12
 
     penjelasan_pasar = """
@@ -146,26 +152,42 @@ harga_simulasi = harga_pasar + biaya_marginal + (muc_awal * r)
 waktu_habis = stok_awal / produksi
 
 # =====================================================
-# SIMULASI STOK
+# SIMULASI STOK DAN EKSTRAKSI
 # =====================================================
 
 tahun = []
 stok = []
+ekstraksi = []
 
 sisa = stok_awal
 
-for i in range(1, 11):
+for i in range(1, tahun_simulasi + 1):
+
     tahun.append(i)
 
-    sisa -= produksi
+    # ekstraksi per tahun
+    if sisa > produksi:
+        ekstraksi_tahun = produksi
+    else:
+        ekstraksi_tahun = sisa
+
+    ekstraksi.append(ekstraksi_tahun)
+
+    # update stok
+    sisa -= ekstraksi_tahun
 
     if sisa < 0:
         sisa = 0
 
     stok.append(sisa)
 
-stok_df = pd.DataFrame({
+# =====================================================
+# DATAFRAME
+# =====================================================
+
+simulasi_df = pd.DataFrame({
     "Tahun": tahun,
+    "Jumlah Ekstraksi": ekstraksi,
     "Sisa Stok": stok
 })
 
@@ -181,7 +203,7 @@ with col1:
     st.metric("Struktur Pasar", pasar)
 
 with col2:
-    st.metric("Produksi", f"{produksi:,.0f}")
+    st.metric("Produksi/Tahun", f"{produksi:,.0f}")
 
 with col3:
     st.metric("Harga Simulasi", f"Rp {harga_simulasi:,.0f}")
@@ -192,24 +214,51 @@ with col4:
 st.info(penjelasan_pasar)
 
 # =====================================================
-# GRAFIK STOK
+# TABEL SIMULASI
 # =====================================================
 
+st.subheader("Tabel Ekstraksi dan Sisa Stok")
+
+st.dataframe(simulasi_df, use_container_width=True)
+
+# =====================================================
+# GRAFIK STOK SUMBER DAYA
+# =====================================================
+
+st.subheader("Grafik Stok Sumber Daya")
+
 fig1 = px.line(
-    stok_df,
+    simulasi_df,
     x="Tahun",
     y="Sisa Stok",
     markers=True,
-    title="Penurunan Stok Batu Bara"
+    title="Penurunan Stok Batu Bara",
+    line_shape="linear"
 )
 
 st.plotly_chart(fig1, use_container_width=True)
 
 # =====================================================
+# GRAFIK EKSTRAKSI PER TAHUN
+# =====================================================
+
+st.subheader("Grafik Jumlah Ekstraksi per Tahun")
+
+fig_ekstraksi = px.bar(
+    simulasi_df,
+    x="Tahun",
+    y="Jumlah Ekstraksi",
+    title="Jumlah Ekstraksi Batu Bara per Tahun",
+    text_auto=True
+)
+
+st.plotly_chart(fig_ekstraksi, use_container_width=True)
+
+# =====================================================
 # HOTELLING MODEL
 # =====================================================
 
-hotelling_tahun = np.arange(1, 11)
+hotelling_tahun = np.arange(1, tahun_simulasi + 1)
 
 hotelling_harga = [
     (harga_pasar * ((1 + r) ** t))
@@ -223,7 +272,7 @@ hotelling_df = pd.DataFrame({
 
 st.subheader("Model Hotelling")
 
-st.dataframe(hotelling_df)
+st.dataframe(hotelling_df, use_container_width=True)
 
 fig2 = px.line(
     hotelling_df,
@@ -243,7 +292,7 @@ st.subheader("Green Paradox")
 
 green_df = pd.DataFrame({
     "Tahun": hotelling_tahun,
-    "Ekstraksi": np.linspace(produksi, produksi * 1.5, 10)
+    "Ekstraksi": np.linspace(produksi, produksi * 1.5, tahun_simulasi)
 })
 
 fig3 = px.line(
@@ -265,7 +314,10 @@ st.subheader("Kesimpulan")
 st.write(f"""
 Pada studi kasus PT Indo Tambangraya Megah,
 struktur pasar {pasar} menghasilkan produksi sebesar {produksi:,.0f}
-dengan estimasi stok habis dalam {waktu_habis:.1f} tahun.
+per tahun dengan estimasi stok habis dalam {waktu_habis:.1f} tahun.
+
+Grafik stok sumber daya menunjukkan penurunan cadangan batu bara
+seiring meningkatnya aktivitas ekstraksi.
 
 Model Hotelling menunjukkan bahwa harga sumber daya
 akan meningkat seiring waktu, sedangkan Green Paradox
